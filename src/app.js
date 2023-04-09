@@ -1,6 +1,6 @@
 const express = require("express");
 
-const userRouter = require("./routes/users");
+const usersRouter = require("./routes/users");
 const tasksRouter = require("./routes/tasks");
 
 const initMongoose = require("./db/mongoose");
@@ -12,9 +12,13 @@ initMongoose();
 
 app.use(express.json());
 
-app.use(userRouter);
+app.use(usersRouter);
 app.use(tasksRouter);
 
+/**
+ * error handler middleware
+ * @todo refactor implementation
+ */
 app.use((err, _req, res, _next) => {
   console.error({ err });
 
