@@ -8,12 +8,6 @@ const Task = require("./tasks");
 
 const userSchema = new Schema({
   name: { type: String, required: true, trim: true },
-  occupation: {
-    type: String,
-    validate(value) {
-      if (value === "Receptionist") throw new Error("We don't do that anymore!");
-    },
-  },
   email: {
     type: String,
     required: true,
