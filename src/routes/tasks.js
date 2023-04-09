@@ -2,6 +2,7 @@ const express = require("express");
 
 const router = new express.Router();
 const errorHandler = require("../middleware/errorHandler");
+const auth = require("../middleware/auth");
 
 const Task = require("../models/tasks");
 
@@ -10,8 +11,9 @@ const Task = require("../models/tasks");
  */
 router.get(
   "/tasks/:id",
+  auth,
   errorHandler(async (req, res) => {
-    const getTask = await Task.findById(req.params.id);
+    const getTask = await Task.findOne({ _id: req.params.id, owner: req.user._id });
 
     if (!getTask) return res.status(404).send("Task not found");
 
@@ -21,27 +23,29 @@ router.get(
 
 router.get(
   "/tasks",
-  errorHandler(async (_req, res) => {
-    const getTasks = await Task.find({});
+  auth,
+  errorHandler(async ({ user }, res) => {
+    await user.populate("tasks");
 
-    return res.status(200).send(getTasks);
+    return res.status(200).send(user.tasks);
   })
 );
 
 router.patch(
   "/tasks/:id",
-  errorHandler(async (req, res) => {
+  auth,
+  errorHandler(async ({ body, params: { id: _id }, user: { id: owner } }, res) => {
     const allowedUpdates = ["description", "completed"];
-    const updates = Object.keys(req.body);
+    const updates = Object.keys(body);
     const isValidUpdate = updates.every((update) => allowedUpdates.includes(update));
-
-    const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const task = await Task.findOne({ _id, owner });
 
     if (!task) return res.status(404).send("Task not found");
     if (!isValidUpdate) return res.status(400).send("Invalid update");
+
+    updates.forEach((update) => (task[update] = body[update]));
+
+    await task.save();
 
     res.status(200).send(task);
   })
@@ -49,8 +53,9 @@ router.patch(
 
 router.post(
   "/tasks",
-  errorHandler(async (req, res) => {
-    const task = new Task(req.body);
+  auth,
+  errorHandler(async ({ body, user: { _id } }, res) => {
+    const task = new Task({ ...body, owner: _id });
 
     await task.save();
 
@@ -60,8 +65,9 @@ router.post(
 
 router.delete(
   "/tasks/:id",
-  errorHandler(async (req, res) => {
-    const getTask = await Task.findByIdAndDelete(req.params.id);
+  auth,
+  errorHandler(async ({ params: { id: _id }, user: { id: owner } }, res) => {
+    const getTask = await Task.findOneAndDelete({ _id, owner });
 
     if (!getTask) return res.status(404).send("Task not found");
 
