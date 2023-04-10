@@ -24,8 +24,21 @@ router.get(
 router.get(
   "/tasks",
   auth,
-  errorHandler(async ({ user }, res) => {
-    await user.populate("tasks");
+  errorHandler(async ({ user, query: { completed, limit = 5, skip = 0, sortBy = "" } }, res) => {
+    const [field, value] = sortBy.split(":");
+
+    await user.populate({
+      path: "tasks",
+      ...(completed && { match: { completed: completed === "true" } }),
+      options: {
+        limit: parseInt(limit),
+        skip: parseInt(skip),
+        // asc = 1, desc = -1
+        sort: {
+          ...(sortBy && { [field]: value === "desc" ? -1 : 1 }),
+        },
+      },
+    });
 
     return res.status(200).send(user.tasks);
   })
