@@ -1,7 +1,7 @@
 const express = require("express");
 
 const router = new express.Router();
-const errorHandler = require("../middleware/errorHandler");
+const errorHandler = require("../middleware/routeErrorHandler");
 const auth = require("../middleware/auth");
 
 const Task = require("../models/tasks");
