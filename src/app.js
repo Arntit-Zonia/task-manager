@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 
 const usersRouter = require("./routes/users");
@@ -7,7 +8,6 @@ const initMongoose = require("./db/mongoose");
 const middlewareErrorHandler = require("./middleware/middlewareErrorHandler");
 
 const app = express();
-const port = 3000;
 
 initMongoose();
 
@@ -18,4 +18,4 @@ app.use(tasksRouter);
 
 app.use(middlewareErrorHandler);
 
-app.listen(port, () => console.log(`Server listening on port ${port}`));
+app.listen(process.env.PORT, () => console.log(`Server listening on port ${process.env.PORT}`));
