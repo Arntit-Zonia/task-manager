@@ -1,4 +1,3 @@
-require("dotenv").config();
 const express = require("express");
 
 const usersRouter = require("./routes/users");
@@ -18,4 +17,4 @@ app.use(tasksRouter);
 
 app.use(middlewareErrorHandler);
 
-app.listen(process.env.PORT, () => console.log(`Server listening on port ${process.env.PORT}`));
+module.exports = app;
