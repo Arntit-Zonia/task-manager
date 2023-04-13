@@ -3,7 +3,8 @@
         "browser": true,
         "commonjs": true,
         "es2021": true,
-        "node": true
+        "node": true,
+        "jest/globals": true
     },
     "extends": "eslint:recommended",
     "overrides": [
@@ -11,7 +12,7 @@
     "parserOptions": {
         "ecmaVersion": "latest"
     },
-    "plugins": ["import"],
+    "plugins": ["import", "jest"],
     "rules": {
         "no-unused-vars": "error",
         "import/no-unresolved": "error"
