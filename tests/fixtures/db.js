@@ -5,6 +5,7 @@ const User = require("../../src/models/users");
 const Task = require("../../src/models/tasks");
 
 const mockUserId = new ObjectId();
+const otherTaskMockId = new ObjectId();
 const mockUser = {
   _id: mockUserId,
   name: "first-user",
@@ -50,5 +51,6 @@ module.exports = {
   mockTaskOne,
   mockTaskTwo,
   bearerToken,
+  otherTaskMockId,
   setUpDatabase,
 };

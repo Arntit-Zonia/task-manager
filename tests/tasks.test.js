@@ -1,8 +1,7 @@
 const request = require("supertest");
-const { ObjectId } = require("mongodb");
 
 const app = require("../src/app");
-const { mockTaskOne, bearerToken, setUpDatabase } = require("./fixtures/db");
+const { mockTaskOne, bearerToken, otherTaskMockId, setUpDatabase } = require("./fixtures/db");
 
 const Task = require("../src/models/tasks");
 
@@ -46,10 +45,10 @@ describe("Tasks", () => {
 
     it("should not get a task that belongs to another user", async () => {
       const otherTask = {
-        _id: new ObjectId(),
+        _id: otherTaskMockId,
         description: "Task from another user",
         completed: false,
-        owner: new ObjectId(),
+        owner: otherTaskMockId,
       };
 
       await new Task(otherTask).save();
@@ -98,7 +97,7 @@ describe("Tasks", () => {
 
     it("should not update a task if it is not found", async () => {
       const { status } = await request(app)
-        .patch(`/tasks/${new ObjectId()}`)
+        .patch(`/tasks/${otherTaskMockId}`)
         .send({ description: "updated-description" })
         .set("Authorization", bearerToken);
 
@@ -115,10 +114,10 @@ describe("Tasks", () => {
 
     it("should not update a task that belongs to another user", async () => {
       const otherTask = {
-        _id: new ObjectId(),
+        _id: otherTaskMockId,
         description: "Task from another user",
         completed: false,
-        owner: new ObjectId(),
+        owner: otherTaskMockId,
       };
 
       await new Task(otherTask).save();
@@ -153,10 +152,10 @@ describe("Tasks", () => {
 
     it("should not delete a task that belongs to another user", async () => {
       const otherTask = {
-        _id: new ObjectId(),
+        _id: otherTaskMockId,
         description: "Task of another user",
         completed: false,
-        owner: new ObjectId(),
+        owner: otherTaskMockId,
       };
       await new Task(otherTask).save();
 
