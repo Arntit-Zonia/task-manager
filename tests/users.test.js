@@ -1,13 +1,11 @@
 const request = require("supertest");
 
 const app = require("../src/app");
-const { mockObjectId, mockUser, setUpDatabase } = require("./fixtures/db");
+const { mockUserId, mockUser, bearerToken, setUpDatabase } = require("./fixtures/db");
 
 const User = require("../src/models/users");
 
 describe("Users", () => {
-  const bearerToken = `Bearer ${mockUser.tokens[0].token}`;
-
   beforeEach(async () => {
     await setUpDatabase();
   });
@@ -26,7 +24,7 @@ describe("Users", () => {
     });
 
     it("should get user's avatar image", async () => {
-      const avatar = await request(app).get(`/users/${mockObjectId}/avatar`).set("Authorization", bearerToken);
+      const avatar = await request(app).get(`/users/${mockUserId}/avatar`).set("Authorization", bearerToken);
 
       expect(avatar.status).toBe(200);
       expect(avatar.header["content-type"]).toBe("image/png");
@@ -59,7 +57,7 @@ describe("Users", () => {
         email: mockUser.email,
         password: mockUser.password,
       });
-      const newToken = await User.findById(mockObjectId);
+      const newToken = await User.findById(mockUserId);
 
       expect(token).toBe(newToken.tokens[1].token);
       expect(status).toBe(200);
@@ -79,7 +77,7 @@ describe("Users", () => {
         .post("/users/me/avatar")
         .set("Authorization", bearerToken)
         .attach("avatar", "tests/fixtures/assets/test.jpg");
-      const user = await User.findById(mockObjectId);
+      const user = await User.findById(mockUserId);
 
       expect(uploadedAvatar.status).toBe(200);
       expect(user.avatar).toEqual(expect.any(Buffer));
@@ -90,12 +88,12 @@ describe("Users", () => {
 
       expect(loggedOutUser.status).toBe(200);
 
-      const user = await User.findById(mockObjectId);
+      const user = await User.findById(mockUserId);
       expect(user.tokens.length).toBe(0);
     });
 
     it("should logout the authenticated user from all sessions", async () => {
-      await User.findByIdAndUpdate(mockObjectId, {
+      await User.findByIdAndUpdate(mockUserId, {
         $push: {
           tokens: {
             token: "mockToken",
@@ -107,7 +105,7 @@ describe("Users", () => {
 
       expect(loggedOutUser.status).toBe(200);
 
-      const user = await User.findById(mockObjectId);
+      const user = await User.findById(mockUserId);
       expect(user.tokens.length).toBe(0);
     });
   });
@@ -117,7 +115,7 @@ describe("Users", () => {
       const response = await request(app).patch("/users/me").set("Authorization", bearerToken).send({
         name: "updated-name",
       });
-      const updatedField = await User.findById(mockObjectId);
+      const updatedField = await User.findById(mockUserId);
 
       expect(response.status).toBe(200);
       expect(updatedField.name).toBe("updated-name");
@@ -135,7 +133,7 @@ describe("Users", () => {
   describe("DELETE requests", () => {
     it("should delete user account", async () => {
       const user = await request(app).delete("/users/me").set("Authorization", bearerToken);
-      const deletedUser = await User.findById(mockObjectId);
+      const deletedUser = await User.findById(mockUserId);
 
       expect(user.status).toBe(200);
       expect(deletedUser).toBeNull();
@@ -153,7 +151,7 @@ describe("Users", () => {
 
     expect(deletedAvatar.status).toBe(200);
 
-    const user = await User.findById(mockObjectId);
+    const user = await User.findById(mockUserId);
     expect(user.avatar).toBeUndefined();
   });
 });
